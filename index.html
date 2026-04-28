@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HIV FastFlow Dx | Servicio de Inmunología HU-UANL</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --panel:#ffffff;
+      --ink:#182032;
+      --muted:#667085;
+      --line:#d9e0ea;
+      --brand:#0b4b78;
+      --brand2:#1172a7;
+      --accent:#11a37f;
+      --warn:#c77700;
+      --danger:#b42318;
+      --soft:#eef7fb;
+      --soft2:#f0fbf7;
+      --shadow: 0 12px 35px rgba(16,24,40,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(135deg,#f7fbff 0%,#f4f7fb 45%,#eef8f5 100%);
+      color:var(--ink);
+    }
+    a{color:var(--brand2); text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{
+      padding:30px 22px 20px;
+      background:linear-gradient(135deg,#0b4b78 0%,#1172a7 55%,#11a37f 100%);
+      color:white;
+      position:relative;
+      overflow:hidden;
+    }
+    header:after{
+      content:"";
+      position:absolute; right:-100px; top:-130px; width:360px; height:360px;
+      border-radius:50%; background:rgba(255,255,255,.12);
+    }
+    .wrap{max-width:1180px; margin:0 auto;}
+    .topline{display:flex; gap:14px; align-items:center; flex-wrap:wrap; position:relative; z-index:1}
+    .mark{
+      width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.16);
+      display:grid;place-items:center;border:1px solid rgba(255,255,255,.25);
+      font-weight:800;letter-spacing:.5px;
+    }
+    h1{font-size:clamp(28px,4vw,48px); line-height:1.02; margin:16px 0 8px; position:relative; z-index:1}
+    .subtitle{font-size:18px; max-width:950px; opacity:.96; line-height:1.45; position:relative; z-index:1}
+    .chips{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; position:relative; z-index:1}
+    .chip{
+      padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.25); font-size:13px;
+    }
+    .notice{
+      background:#fff8e6; border:1px solid #ffe0a3; padding:14px 16px; border-radius:14px;
+      margin:18px 0; color:#5f3b00; line-height:1.45;
+    }
+    nav{
+      position:sticky; top:0; z-index:20; background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+    }
+    .tabs{display:flex; gap:8px; overflow:auto; padding:10px 0;}
+    .tabbtn{
+      border:1px solid var(--line); background:#fff; color:#263248; border-radius:999px;
+      padding:10px 13px; white-space:nowrap; cursor:pointer; font-weight:650; font-size:14px;
+    }
+    .tabbtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    main{padding:20px 22px 60px}
+    section.tab{display:none}
+    section.tab.active{display:block}
+    .grid{display:grid; gap:18px}
+    .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media (max-width: 860px){.grid.two,.grid.three{grid-template-columns:1fr}}
+    .card{
+      background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+      padding:20px; box-shadow:var(--shadow);
+    }
+    .card h2,.card h3{margin-top:0}
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .kpi{font-size:34px;font-weight:850;color:var(--brand);line-height:1}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}
+    .pill.green{background:#e8f7f1;color:#087456}
+    .pill.blue{background:#e7f1fb;color:#0b4b78}
+    .pill.orange{background:#fff3df;color:#9a5a00}
+    .pill.red{background:#fee4e2;color:#b42318}
+    .flow{
+      display:grid; gap:14px; align-items:center;
+    }
+    .lane{
+      display:grid; grid-template-columns: 1fr 38px 1fr 38px 1fr; gap:8px; align-items:center;
+    }
+    @media(max-width:900px){.lane{grid-template-columns:1fr}.arrow{transform:rotate(90deg); justify-self:center}}
+    .node{
+      border:2px solid #d8e3ee; background:#fff; border-radius:18px; padding:16px; min-height:116px;
+    }
+    .node strong{display:block; font-size:16px; margin-bottom:6px}
+    .node.primary{border-color:#9bd3ee; background:#f0f9ff}
+    .node.good{border-color:#9ee0cc;background:#effbf7}
+    .node.warn{border-color:#ffd08a;background:#fff8ed}
+    .node.danger{border-color:#f5a8a2;background:#fff3f2}
+    .arrow{font-size:30px; text-align:center; color:var(--brand2); font-weight:900}
+    .miniFlow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+    .miniFlow .step{flex:1;min-width:190px;border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff}
+    .step .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:999px;background:var(--brand);color:white;font-weight:800;margin-right:6px}
+    label{font-weight:700;font-size:13px;display:block;margin:0 0 6px;color:#354054}
+    input,select,textarea{
+      width:100%; padding:10px 12px; border:1px solid #cfd8e3; border-radius:12px; background:#fff; color:var(--ink);
+      font-size:14px;
+    }
+    .formgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    @media(max-width:900px){.formgrid{grid-template-columns:1fr}}
+    button{
+      border:0; border-radius:13px; background:var(--brand); color:white; padding:11px 14px;
+      font-weight:800; cursor:pointer;
+    }
+    button.secondary{background:#eef3f8;color:#223047;border:1px solid var(--line)}
+    button.good{background:var(--accent)}
+    button.warn{background:var(--warn)}
+    .result{
+      border-radius:18px;padding:17px;border:1px solid var(--line);background:#f8fafc;line-height:1.45;
+    }
+    .result h3{margin:0 0 6px}
+    .result.red{background:#fff5f5;border-color:#f3b8b4}
+    .result.orange{background:#fff9ed;border-color:#ffd392}
+    .result.green{background:#f0fbf7;border-color:#a7e2d0}
+    .result.blue{background:#f0f8ff;border-color:#9bd3ee}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:#f7f9fc;color:#344054}
+    .tableWrap{overflow:auto;border:1px solid var(--line);border-radius:16px}
+    .case{
+      border:1px solid var(--line); border-radius:16px; padding:16px; background:#fff;
+      box-shadow:0 5px 18px rgba(16,24,40,.04)
+    }
+    .case h3{margin:0 0 8px}
+    .answer{display:none;margin-top:12px;padding:12px;border-radius:13px;background:#f0fbf7;border:1px solid #b9e9d9}
+    .answer.show{display:block}
+    .scoreBox{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .sourceList li{margin:8px 0}
+    .footer{
+      color:#667085;font-size:12px;text-align:center;margin-top:30px;padding-top:16px;border-top:1px solid var(--line)
+    }
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+    .tag{display:inline-block;background:#eef4ff;color:#263b72;border-radius:999px;padding:4px 8px;font-size:12px;margin:2px}
+    .printOnly{display:none}
+    @media print{
+      nav,.toolbar button{display:none}
+      section.tab{display:block}
+      body{background:white}
+      .card{box-shadow:none;break-inside:avoid}
+      .printOnly{display:block}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topline">
+      <div class="mark">HU</div>
+      <div>
+        <div style="font-weight:800">Servicio de Inmunología · Hospital Universitario “Dr. José Eleuterio González” · UANL</div>
+        <div style="opacity:.9">Prototipo educativo y de apoyo a decisiones diagnósticas</div>
+      </div>
+    </div>
+    <h1>HIV FastFlow Dx</h1>
+    <p class="subtitle">
+      Algoritmo interactivo para diagnóstico de VIH basado en guías internacionales recientes, ventanas diagnósticas,
+      escenarios especiales, pruebas disponibles y casos clínicos para entrenamiento médico.
+    </p>
+    <div class="chips">
+      <span class="chip">Actualizado: 28 abril 2026</span>
+      <span class="chip">OMS 2024 · CDC/APHL · NIH 2025 · OPS · CENSIDA/NOM México</span>
+      <span class="chip">Incluye PrEP oral, CAB-LA, lenacapavir y sospecha de infección aguda</span>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap tabs">
+    <button class="tabbtn active" data-tab="inicio">Inicio</button>
+    <button class="tabbtn" data-tab="flujo">Diagrama de flujo</button>
+    <button class="tabbtn" data-tab="simulador">Simulador</button>
+    <button class="tabbtn" data-tab="casos">Casos clínicos</button>
+    <button class="tabbtn" data-tab="pruebas">Pruebas y laboratorios</button>
+    <button class="tabbtn" data-tab="evidencia">Evidencia y ligas</button>
+    <button class="tabbtn" data-tab="clinicas">Recomendaciones</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="notice">
+    <strong>Uso previsto:</strong> herramienta educativa para médicos, docentes y personal de salud. No sustituye normas locales,
+    juicio clínico, consentimiento informado, consejería, trazabilidad de muestras ni validación por laboratorio certificado.
+    Todo resultado reactivo, discordante o de alto riesgo debe manejarse con ruta confirmatoria y vinculación clínica.
+  </div>
+
+  <section class="tab active" id="inicio">
+    <div class="grid two">
+      <div class="card">
+        <h2>Objetivo del prototipo</h2>
+        <p>
+          Mejorar el uso operativo de algoritmos existentes, no reemplazarlos. La propuesta integra:
+        </p>
+        <ul>
+          <li>Algoritmo programático OMS de tres resultados reactivos consecutivos.</li>
+          <li>Algoritmo clínico/laboratorio CDC/APHL con Ag/Ac de 4ª generación, diferenciación VIH-1/VIH-2 y NAT ante discordancia.</li>
+          <li>Ventana diagnóstica, infección aguda, PrEP/PEP, PrEP inyectable y escenarios pediátricos.</li>
+          <li>Recomendaciones de vinculación inmediata a atención, prevención y seguimiento.</li>
+        </ul>
+        <div class="toolbar">
+          <button onclick="openTab('flujo')">Ver flujo</button>
+          <button class="secondary" onclick="openTab('simulador')">Probar caso</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Principios clave</h2>
+        <div class="grid two">
+          <div>
+            <div class="kpi">3</div>
+            <strong>pruebas reactivas</strong>
+            <p class="small muted">En el enfoque OMS, el diagnóstico positivo requiere tres resultados reactivos consecutivos con pruebas diferentes.</p>
+          </div>
+          <div>
+            <div class="kpi">10–33</div>
+            <strong>días</strong>
+            <p class="small muted">Ventana aproximada de NAT/RNA en ausencia de antirretrovirales.</p>
+          </div>
+          <div>
+            <div class="kpi">18–45</div>
+            <strong>días</strong>
+            <p class="small muted">Ventana aproximada de Ag/Ac de laboratorio en sangre venosa.</p>
+          </div>
+          <div>
+            <div class="kpi">PEP</div>
+            <strong>&lt;72 h</strong>
+            <p class="small muted">Toda exposición reciente de alto riesgo amerita evaluación urgente para PEP.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>¿Dónde está la mejora?</h2>
+      <div class="miniFlow">
+        <div class="step"><span class="n">1</span><strong>Riesgo preprueba</strong><br><span class="muted">Tiempo desde exposición, síntomas, tipo de prueba, PrEP/PEP y prevalencia.</span></div>
+        <div class="step"><span class="n">2</span><strong>Ruta adecuada</strong><br><span class="muted">OMS comunitario, CDC hospitalario, pediátrico o infección aguda.</span></div>
+        <div class="step"><span class="n">3</span><strong>Interpretación segura</strong><br><span class="muted">Negativo, positivo, inconcluso, agudo probable o repetir por ventana.</span></div>
+        <div class="step"><span class="n">4</span><strong>Acción clínica</strong><br><span class="muted">Vinculación, ART, PEP, PrEP, repetición, referencia o control de calidad.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="flujo">
+    <div class="card">
+      <h2>Diagrama de flujo: selección de ruta diagnóstica</h2>
+      <div class="flow">
+        <div class="node primary">
+          <strong>Paciente que solicita o requiere prueba de VIH</strong>
+          Registrar edad, fecha de exposición, síntomas, embarazo, PrEP/PEP, tipo de muestra y prueba disponible.
+        </div>
+        <div class="arrow">↓</div>
+        <div class="lane">
+          <div class="node warn">
+            <strong>¿Menor de 18 meses?</strong>
+            No confirmar infección con serología aislada por anticuerpos maternos.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node primary">
+            <strong>Ruta pediátrica</strong>
+            NAT/DNA/RNA según protocolo local, muestra nueva y referencia pediátrica/infectología.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node good">
+            <strong>Seguimiento</strong>
+            Repetición programada y manejo perinatal.
+          </div>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="lane">
+          <div class="node warn">
+            <strong>¿Exposición &lt;72 h?</strong>
+            Evaluar riesgo sexual, ocupacional, violencia sexual o aguja.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node primary">
+            <strong>PEP urgente</strong>
+            Prueba basal VIH + HBV/HCV/ITS/embarazo según caso. No esperar prueba confirmatoria si PEP indicada.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node good">
+            <strong>Repruebas</strong>
+            Seguimiento según protocolo, ventana diagnóstica y uso de antirretrovirales.
+          </div>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="lane">
+          <div class="node warn">
+            <strong>¿Sospecha de infección aguda?</strong>
+            Exposición reciente, fiebre, exantema, faringitis, adenopatías, ITS reciente, prueba negativa temprana o PrEP/PEP.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node primary">
+            <strong>Ruta hospitalaria</strong>
+            Ag/Ac 4ª gen en sangre venosa + HIV-1 RNA/NAT. Considerar HIV-2 RNA si riesgo epidemiológico.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node warn">
+            <strong>Discordancia</strong>
+            Clasificar como inconcluso o infección aguda probable. Repetir con nueva muestra y laboratorio de referencia.
+          </div>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="lane">
+          <div class="node primary">
+            <strong>Ruta OMS programática</strong>
+            A1 sensible → A2 diferente → A3 diferente si A1/A2 reactivas.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node good">
+            <strong>3 reactivas</strong>
+            Diagnóstico VIH positivo. Retest antes de ART si lo exige el programa local.
+          </div>
+          <div class="arrow">→</div>
+          <div class="node good">
+            <strong>Vincular</strong>
+            Atención VIH, ART inmediata o lo antes posible, consejería, prevención y notificación conforme normativa.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:18px">
+      <div class="card">
+        <h3>Algoritmo OMS 2024: salud pública</h3>
+        <ol>
+          <li><strong>A1 no reactiva:</strong> reportar negativo, salvo ventana/sospecha aguda.</li>
+          <li><strong>A1 reactiva:</strong> aplicar A2, prueba distinta.</li>
+          <li><strong>A1 + A2 reactivas:</strong> aplicar A3, prueba distinta.</li>
+          <li><strong>A1 + A2 + A3 reactivas:</strong> diagnóstico positivo.</li>
+          <li><strong>Discordancia:</strong> inconcluso; muestra nueva, repetición y/o referencia.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Algoritmo CDC/APHL: laboratorio clínico</h3>
+        <ol>
+          <li>Iniciar con inmunoensayo VIH-1/2 Ag/Ac de 4ª generación.</li>
+          <li>Si reactivo: prueba suplementaria de diferenciación VIH-1/VIH-2.</li>
+          <li>Si diferenciación positiva: clasificar VIH-1, VIH-2 o ambos.</li>
+          <li>Si Ag/Ac reactivo pero diferenciación negativa/indeterminada: HIV-1 RNA/NAT.</li>
+          <li>Si NAT positivo: infección aguda probable; vincular y confirmar.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="simulador">
+    <div class="card">
+      <h2>Simulador de decisión diagnóstica</h2>
+      <p class="muted">Introduce los datos mínimos del caso. La salida es una recomendación educativa, no una orden médica.</p>
+      <div class="formgrid">
+        <div>
+          <label>Edad</label>
+          <select id="ageGroup">
+            <option value="adult">≥18 meses</option>
+            <option value="infant">&lt;18 meses</option>
+          </select>
+        </div>
+        <div>
+          <label>Días desde última exposición posible</label>
+          <input id="days" type="number" min="0" value="21" />
+        </div>
+        <div>
+          <label>¿Síntomas compatibles con infección aguda?</label>
+          <select id="acuteSymptoms">
+            <option value="no">No / no claros</option>
+            <option value="yes">Sí</option>
+          </select>
+        </div>
+        <div>
+          <label>PrEP/PEP</label>
+          <select id="prep">
+            <option value="none">No usa PrEP/PEP</option>
+            <option value="oral">PrEP oral</option>
+            <option value="pep">PEP reciente o actual</option>
+            <option value="cab">CAB-LA o antecedente reciente</option>
+            <option value="len">Lenacapavir o antecedente reciente</option>
+          </select>
+        </div>
+        <div>
+          <label>Resultado A1 o Ag/Ac inicial</label>
+          <select id="a1">
+            <option value="notdone">No realizado</option>
+            <option value="negative">No reactivo</option>
+            <option value="reactive">Reactivo</option>
+          </select>
+        </div>
+        <div>
+          <label>Resultado A2 / diferenciación</label>
+          <select id="a2">
+            <option value="notdone">No realizado</option>
+            <option value="negative">No reactivo / negativo</option>
+            <option value="reactive">Reactivo / positivo</option>
+            <option value="indeterminate">Indeterminado</option>
+          </select>
+        </div>
+        <div>
+          <label>Resultado A3</label>
+          <select id="a3">
+            <option value="notdone">No realizado</option>
+            <option value="negative">No reactivo</option>
+            <option value="reactive">Reactivo</option>
+          </select>
+        </div>
+        <div>
+          <label>HIV-1 RNA / NAT</label>
+          <select id="nat">
+            <option value="notdone">No realizado</option>
+            <option value="negative">No detectado</option>
+            <option value="positive">Detectado</option>
+          </select>
+        </div>
+        <div>
+          <label>Contexto</label>
+          <select id="context">
+            <option value="hospital">Hospital/laboratorio clínico</option>
+            <option value="community">Tamizaje comunitario/programático</option>
+            <option value="pregnancy">Embarazo</option>
+            <option value="occupational">Exposición ocupacional</option>
+          </select>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button onclick="runDecision()">Analizar caso</button>
+        <button class="secondary" onclick="resetSimulator()">Reiniciar</button>
+        <button class="good" onclick="copyNote()">Copiar nota sugerida</button>
+      </div>
+      <div id="decisionResult" class="result blue">
+        <h3>Resultado</h3>
+        Completa el caso y presiona “Analizar caso”.
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="casos">
+    <div class="card">
+      <h2>Casos clínicos hipotéticos para retar a médicos</h2>
+      <p class="muted">Cada caso tiene una respuesta sugerida. Úselos para sesiones clínicas, examen rápido o discusión de calidad diagnóstica.</p>
+      <div class="scoreBox">
+        <button onclick="expandAllCases()">Mostrar todas las respuestas</button>
+        <button class="secondary" onclick="collapseAllCases()">Ocultar respuestas</button>
+      </div>
+    </div>
+    <div id="caseContainer" class="grid two" style="margin-top:18px"></div>
+  </section>
+
+  <section class="tab" id="pruebas">
+    <div class="card">
+      <h2>Pruebas diagnósticas, laboratorios y marcas</h2>
+      <p>
+        Esta tabla es una guía educativa con ejemplos internacionales. No implica disponibilidad, compra, aval institucional ni registro local.
+        Para implementación en México, verificar registro sanitario, validación interna, controles de calidad, contrato institucional, trazabilidad,
+        capacitación y lineamientos vigentes.
+      </p>
+      <div class="toolbar">
+        <select id="testFilter" style="max-width:300px" onchange="renderTests()">
+          <option value="all">Todas las categorías</option>
+          <option value="lab">Ag/Ac laboratorio</option>
+          <option value="rapid">Rápidas / punto de atención</option>
+          <option value="supp">Suplementarias / diferenciación</option>
+          <option value="nat">NAT / RNA</option>
+        </select>
+        <input id="testSearch" style="max-width:320px" oninput="renderTests()" placeholder="Buscar marca, plataforma o uso..." />
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Categoría</th><th>Ejemplos</th><th>Muestra/plataforma</th><th>Uso ideal</th><th>Limitación crítica</th></tr></thead>
+          <tbody id="testRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:18px">
+      <div class="card">
+        <h3>Ventanas diagnósticas aproximadas</h3>
+        <div class="tableWrap">
+          <table>
+            <thead><tr><th>Tipo de prueba</th><th>Ventana aproximada</th><th>Comentario</th></tr></thead>
+            <tbody>
+              <tr><td>NAT / HIV RNA</td><td>10–33 días</td><td>Más útil en infección aguda o discordancia; puede alterarse si hay PrEP/PEP.</td></tr>
+              <tr><td>Ag/Ac 4ª gen en vena</td><td>18–45 días</td><td>Preferible para laboratorio clínico.</td></tr>
+              <tr><td>Ag/Ac rápida por punción digital</td><td>18–90 días</td><td>Útil en punto de atención, pero no cierra ventana temprana.</td></tr>
+              <tr><td>Solo anticuerpos/autoprueba</td><td>23–90 días</td><td>Mayor ventana; resultado reactivo requiere confirmación.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Diseño mínimo de laboratorio</h3>
+        <ul>
+          <li><strong>Recepción:</strong> identificación inequívoca, consentimiento, fecha/hora, tipo de muestra.</li>
+          <li><strong>Fase analítica:</strong> controles internos/externos, lote, caducidad, bitácora y personal capacitado.</li>
+          <li><strong>Fase postanalítica:</strong> reporte con interpretación, ventana diagnóstica y siguiente paso.</li>
+          <li><strong>Referencia:</strong> ruta definida para NAT, diferenciación VIH-1/VIH-2 e inconclusos.</li>
+          <li><strong>Calidad:</strong> auditoría de discordancias, falsos reactivos, pérdida de seguimiento y tiempo a vinculación.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="evidencia">
+    <div class="grid two">
+      <div class="card">
+        <h2>Evidencia y guías base</h2>
+        <ul class="sourceList">
+          <li><strong>OMS 2024:</strong> servicios diferenciados de prueba de VIH; tres resultados reactivos consecutivos para diagnóstico positivo; evitar Western blot/inmunoensayos lineales en algoritmos nacionales.</li>
+          <li><strong>CDC/APHL:</strong> Ag/Ac VIH-1/2 inicial; diferenciación VIH-1/VIH-2; NAT si Ag/Ac reactivo con diferenciación negativa o indeterminada.</li>
+          <li><strong>CDC:</strong> ventanas diagnósticas por tipo de prueba: NAT, Ag/Ac venoso, Ag/Ac rápida y anticuerpos.</li>
+          <li><strong>OMS 2025:</strong> lenacapavir inyectable semestral como opción adicional de PrEP; pruebas rápidas para iniciar/continuar PrEP inyectable en programas.</li>
+          <li><strong>NIH 2025:</strong> iniciar ART para todas las personas con VIH, inmediatamente o lo antes posible tras el diagnóstico.</li>
+          <li><strong>OPS:</strong> la detección debe vincular a tratamiento y prevención; en Latinoamérica/Caribe persiste brecha de diagnóstico y acceso.</li>
+          <li><strong>México:</strong> NOM-010-SSA-2023 y Guía CENSIDA 2025 como referencias nacionales obligadas para implementación clínica.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Ligas útiles</h2>
+        <ul class="sourceList">
+          <li><a target="_blank" href="https://www.who.int/publications/i/item/9789240096394">OMS 2024: Consolidated guidelines on differentiated HIV testing services</a></li>
+          <li><a target="_blank" href="https://stacks.cdc.gov/view/cdc/50872">CDC/APHL: Recommended Laboratory HIV Testing Algorithm</a></li>
+          <li><a target="_blank" href="https://www.cdc.gov/hiv/testing/index.html">CDC: HIV testing and window periods</a></li>
+          <li><a target="_blank" href="https://www.who.int/publications/i/item/9789240111608">OMS 2025: Lenacapavir and testing strategies for long-acting injectable PrEP</a></li>
+          <li><a target="_blank" href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/initiation-antiretroviral-therapy">NIH: Initiation of antiretroviral therapy</a></li>
+          <li><a target="_blank" href="https://www.paho.org/en/topics/hiv-testing-services">OPS/PAHO: HIV testing services</a></li>
+          <li><a target="_blank" href="https://sidof.segob.gob.mx/notas/5690938">NOM-010-SSA-2023: prevención y control de VIH en México</a></li>
+          <li><a target="_blank" href="https://www.gob.mx/censida/documentos/guia-de-manejo-antirretroviral-de-las-personas-con-vih-2025">CENSIDA: Guía de manejo antirretroviral de las personas con VIH 2025</a></li>
+          <li><a target="_blank" href="https://www.fda.gov/vaccines-blood-biologics/complete-list-donor-screening-assays-infectious-agents-and-hiv-diagnostic-assays">FDA: lista de ensayos de VIH y tamizaje de donadores</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Notas científicas críticas</h2>
+      <div class="grid three">
+        <div>
+          <span class="pill blue">Infección aguda</span>
+          <p>Una prueba de anticuerpos negativa no excluye VIH en exposición muy reciente. En sospecha clínica, usar Ag/Ac venoso y HIV RNA/NAT.</p>
+        </div>
+        <div>
+          <span class="pill orange">PrEP/PEP</span>
+          <p>Antirretrovirales pueden modificar cinética viral/serológica. En PrEP inyectable o PEP reciente, manejar discordancias con cautela y laboratorio de referencia.</p>
+        </div>
+        <div>
+          <span class="pill green">Vinculación</span>
+          <p>El valor del diagnóstico aumenta si se conecta con ART inmediata, prevención, consejería, estudios basales y seguimiento.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="clinicas">
+    <div class="grid two">
+      <div class="card">
+        <h2>Recomendaciones para clínicas</h2>
+        <ol>
+          <li>Definir algoritmo local: comunitario, hospitalario y ruta de referencia.</li>
+          <li>Separar tamizaje de diagnóstico confirmado; nunca reportar “positivo definitivo” con una sola prueba rápida.</li>
+          <li>Documentar fecha de última exposición y tipo de prueba para interpretar ventana.</li>
+          <li>Crear una ruta urgente para exposición &lt;72 h y evaluación de PEP.</li>
+          <li>Crear una ruta especial para PrEP oral, CAB-LA, lenacapavir y PEP reciente.</li>
+          <li>Auditar discordancias, falsos reactivos, tiempo a confirmación y pérdida de seguimiento.</li>
+          <li>Entregar resultados con consejería breve, confidencialidad y lenguaje no estigmatizante.</li>
+          <li>Vincular confirmados a atención VIH/ART lo antes posible.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h2>Recomendaciones para médicos</h2>
+        <ul>
+          <li><strong>No cierre falsamente:</strong> prueba negativa temprana no descarta VIH si hay ventana.</li>
+          <li><strong>No sobrediagnostique:</strong> una prueba reactiva inicial requiere confirmación.</li>
+          <li><strong>Pregunte por PrEP/PEP:</strong> cambia la interpretación del algoritmo.</li>
+          <li><strong>Busque infección aguda:</strong> fiebre, exantema, faringitis, adenopatías, úlceras/ITS y exposición reciente.</li>
+          <li><strong>Actúe ante PEP:</strong> si exposición de alto riesgo ocurrió &lt;72 h, derive/evalúe inmediatamente.</li>
+          <li><strong>Proteja al paciente:</strong> confidencialidad, consentimiento, consejería, no discriminación y referencia.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Indicadores de calidad sugeridos</h2>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Indicador</th><th>Meta operativa sugerida</th><th>Por qué importa</th></tr></thead>
+          <tbody>
+            <tr><td>Tiempo de resultado inicial</td><td>Mismo día o &lt;24 h según contexto</td><td>Reduce pérdida de seguimiento.</td></tr>
+            <tr><td>Tiempo a confirmación</td><td>&lt;7 días cuando sea posible</td><td>Evita ansiedad y retraso terapéutico.</td></tr>
+            <tr><td>Tiempo a vinculación</td><td>&lt;7 días; idealmente inmediato</td><td>Impacta supresión viral y transmisión.</td></tr>
+            <tr><td>Discordancias documentadas</td><td>100% con investigación</td><td>Mejora calidad y seguridad.</td></tr>
+            <tr><td>Registro de ventana diagnóstica</td><td>100% de pruebas con exposición reciente</td><td>Evita falsos negativos interpretativos.</td></tr>
+            <tr><td>Consejería y ruta PEP/PrEP</td><td>100% de pacientes elegibles</td><td>Integra diagnóstico con prevención.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Prototipo elaborado para el Servicio de Inmunología, HU-UANL. Actualizar fuentes, lineamientos y disponibilidad local antes de uso institucional.
+  </div>
+</main>
+
+<script>
+  const tests = [
+    {
+      cat:"lab",
+      catLabel:"Ag/Ac laboratorio",
+      examples:"Abbott ARCHITECT HIV Ag/Ab Combo; Abbott Alinity i/s HIV Ag/Ab Combo; Roche Elecsys HIV Duo/Combi PT; Bio-Rad BioPlex 2200 HIV Ag-Ab; Siemens ADVIA Centaur HIV Ag/Ab Combo; Bio-Rad GS HIV Ag/Ab Combo EIA; DiaSorin LIAISON MUREX; Beckman Coulter Access HIV Ag/Ab combo; Ortho VITROS.",
+      sample:"Suero/plasma; plataformas CMIA/ECLIA/ELISA/multiplex.",
+      use:"Primera línea en laboratorio clínico; detecta p24 + anticuerpos VIH-1/VIH-2; útil para infección establecida y parte de infección aguda.",
+      limitation:"No detecta exposición inmediata; reactivo requiere confirmación/reflex."
+    },
+    {
+      cat:"supp",
+      catLabel:"Suplementaria / diferenciación",
+      examples:"Bio-Rad Geenius HIV-1/2 Supplemental Assay; otros ensayos suplementarios autorizados según país.",
+      sample:"Sangre, suero o plasma según inserto; lector dedicado en algunos casos.",
+      use:"Diferenciar VIH-1 vs VIH-2 tras Ag/Ac reactivo.",
+      limitation:"Puede ser negativo/indeterminado en infección aguda; en discordancia se requiere NAT."
+    },
+    {
+      cat:"rapid",
+      catLabel:"Rápidas / punto de atención",
+      examples:"Determine HIV-1/2 Ag/Ab Combo; INSTI HIV-1/HIV-2 Antibody Test; OraQuick ADVANCE; Chembio STAT-PAK; SURE CHECK; DPP; Uni-Gold.",
+      sample:"Punción digital, sangre total, suero/plasma u oral según prueba.",
+      use:"Tamizaje comunitario, urgencias, clínicas, campañas, embarazo/parto cuando no hay laboratorio inmediato.",
+      limitation:"Autopruebas y pruebas de anticuerpos tienen ventana más larga; reactivo no equivale a diagnóstico definitivo."
+    },
+    {
+      cat:"nat",
+      catLabel:"NAT / RNA",
+      examples:"Roche cobas HIV-1; Abbott RealTime HIV-1; Hologic Aptima HIV-1 Quant Dx; Cepheid Xpert HIV-1 VL u otras plataformas validadas.",
+      sample:"Plasma; laboratorio molecular.",
+      use:"Sospecha de infección aguda, discordancia Ag/Ac vs diferenciación, monitoreo de carga viral y casos complejos.",
+      limitation:"Costo, logística, disponibilidad; PrEP/PEP puede modificar resultados; HIV-2 requiere prueba específica si hay riesgo."
+    }
+  ];
+
+  const cases = [
+    {
+      title:"Caso 1: exposición hace 12 días",
+      tags:["Infección aguda","NAT"],
+      stem:"Hombre de 28 años con exposición sexual sin condón hace 12 días, fiebre, faringitis y exantema. Prueba rápida de anticuerpos negativa.",
+      q:"¿Cierra como VIH negativo?",
+      answer:"No. Está en ventana diagnóstica y tiene síndrome compatible con infección aguda. Solicitar Ag/Ac 4ª generación en sangre venosa + HIV-1 RNA/NAT; repetir según resultado y mantener consejería/prevención."
+    },
+    {
+      title:"Caso 2: prueba rápida reactiva en campaña",
+      tags:["Confirmación","Comunitario"],
+      stem:"Mujer de 34 años sin síntomas. En campaña comunitaria, prueba rápida reactiva.",
+      q:"¿Se puede diagnosticar VIH definitivo?",
+      answer:"No con una sola prueba. Debe confirmarse con algoritmo nacional/local: segunda prueba diferente y, si procede, tercera prueba o algoritmo de laboratorio. Consejería, confidencialidad y ruta de vinculación."
+    },
+    {
+      title:"Caso 3: Ag/Ac reactivo, diferenciación negativa",
+      tags:["Discordancia","CDC/APHL"],
+      stem:"Paciente de 22 años. Ag/Ac 4ª gen reactivo; prueba de diferenciación VIH-1/VIH-2 negativa.",
+      q:"¿Cuál es el siguiente paso?",
+      answer:"Solicitar HIV-1 RNA/NAT para descartar infección aguda. Si NAT positivo, infección aguda probable; si negativo, posible falso reactivo inicial, repetir/confirmar con nueva muestra y laboratorio de referencia."
+    },
+    {
+      title:"Caso 4: usuario de PrEP inyectable",
+      tags:["CAB-LA/LEN","Especial"],
+      stem:"Hombre de 31 años en PrEP inyectable de larga acción. Refiere exposición reciente y síntomas leves. Prueba rápida no reactiva.",
+      q:"¿Es suficiente una prueba rápida negativa?",
+      answer:"No necesariamente. En PrEP de larga acción puede haber cinética atípica. Usar ruta cautelosa: Ag/Ac en sangre venosa + HIV-1 RNA/NAT, repetir si discordante y referir."
+    },
+    {
+      title:"Caso 5: lactante expuesto",
+      tags:["Pediatría","NAT"],
+      stem:"Lactante de 2 meses, madre con VIH diagnosticada durante embarazo. Prueba de anticuerpos reactiva.",
+      q:"¿Confirma infección del lactante?",
+      answer:"No. En menores de 18 meses la serología puede reflejar anticuerpos maternos. Requiere diagnóstico virológico por NAT/DNA/RNA y seguimiento perinatal especializado."
+    },
+    {
+      title:"Caso 6: exposición ocupacional hace 6 horas",
+      tags:["PEP","Urgencia"],
+      stem:"Médica residente tiene punción con aguja hueca usada en paciente con estatus VIH desconocido hace 6 horas.",
+      q:"¿Debe esperar confirmación del paciente fuente?",
+      answer:"No si el riesgo es significativo. Evaluar e iniciar PEP lo antes posible dentro de 72 h, con pruebas basales y seguimiento. Ajustar cuando haya información del paciente fuente."
+    },
+    {
+      title:"Caso 7: tres pruebas reactivas",
+      tags:["OMS","Vinculación"],
+      stem:"Paciente con A1 reactiva, A2 reactiva y A3 reactiva, usando pruebas diferentes y controladas.",
+      q:"¿Cuál es la salida del algoritmo?",
+      answer:"Diagnóstico VIH positivo según estrategia OMS. Vincular inmediatamente a atención VIH, considerar retest antes de ART según política local, estudios basales y ART lo antes posible."
+    },
+    {
+      title:"Caso 8: negativo a los 25 días",
+      tags:["Ventana","Seguimiento"],
+      stem:"Paciente con exposición hace 25 días; Ag/Ac de laboratorio no reactivo, sin síntomas.",
+      q:"¿Puede considerarse definitivo?",
+      answer:"Es tranquilizador pero no siempre definitivo dependiendo de fecha y tipo de prueba. Repetir al cierre de ventana apropiada; si hay nueva exposición o síntomas, considerar NAT."
+    }
+  ];
+
+  function openTab(id){
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+    document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('active', s.id===id));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.querySelectorAll('.tabbtn').forEach(btn => btn.addEventListener('click', ()=>openTab(btn.dataset.tab)));
+
+  function resultHTML(kind, title, bullets){
+    return `<h3>${title}</h3><ul>${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+  }
+
+  function runDecision(){
+    const age = document.getElementById('ageGroup').value;
+    const days = Number(document.getElementById('days').value || 0);
+    const symptoms = document.getElementById('acuteSymptoms').value;
+    const prep = document.getElementById('prep').value;
+    const a1 = document.getElementById('a1').value;
+    const a2 = document.getElementById('a2').value;
+    const a3 = document.getElementById('a3').value;
+    const nat = document.getElementById('nat').value;
+    const context = document.getElementById('context').value;
+    const out = document.getElementById('decisionResult');
+    let cls = "result blue";
+    let title = "Ruta sugerida";
+    let bullets = [];
+
+    const specialPrep = ["oral","pep","cab","len"].includes(prep);
+    const acuteRisk = symptoms === "yes" || days <= 33 || specialPrep;
+    const withinPEP = days <= 3 && days >= 0;
+
+    if(age === "infant"){
+      cls = "result orange";
+      title = "Ruta pediátrica: no confirmar con serología aislada";
+      bullets = [
+        "Solicitar diagnóstico virológico conforme protocolo local: NAT/DNA/RNA.",
+        "Interpretar serología con cautela por anticuerpos maternos.",
+        "Referir a pediatría/infectología y revisar profilaxis perinatal, lactancia y seguimiento."
+      ];
+    } else if(withinPEP && context !== "pregnancy"){
+      cls = "result orange";
+      title = "Exposición reciente: evaluar PEP de forma urgente";
+      bullets = [
+        "Si exposición de riesgo ocurrió hace menos de 72 h, valorar PEP inmediatamente.",
+        "Tomar prueba basal de VIH y estudios asociados, pero no retrasar PEP si está indicada.",
+        "Programar seguimiento y pruebas posteriores considerando ventana diagnóstica y antirretrovirales."
+      ];
+    } else if(nat === "positive"){
+      cls = "result red";
+      title = "HIV RNA/NAT detectado";
+      bullets = [
+        "Compatible con infección por VIH, especialmente si hay infección aguda o discordancia serológica.",
+        "Confirmar con muestra nueva/laboratorio de referencia según política local.",
+        "Vincular a atención VIH y considerar ART inmediata o lo antes posible."
+      ];
+    } else if(a1 === "notdone"){
+      cls = "result blue";
+      title = "Iniciar algoritmo";
+      bullets = [
+        acuteRisk ? "Por sospecha de infección aguda/PrEP/PEP, preferir Ag/Ac 4ª generación en sangre venosa + HIV-1 RNA/NAT." : "Realizar prueba inicial sensible: Ag/Ac 4ª generación si está disponible, o prueba rápida validada.",
+        "Registrar fecha de exposición, síntomas y uso de PrEP/PEP.",
+        "Asegurar consejería pre/post prueba y ruta de confirmación si reactiva."
+      ];
+    } else if(a1 === "negative"){
+      if(acuteRisk){
+        cls = "result orange";
+        title = "No reactivo, pero no concluyente por ventana o escenario especial";
+        bullets = [
+          "No descartar VIH si exposición reciente, síntomas compatibles o uso de PrEP/PEP.",
+          "Solicitar o considerar Ag/Ac venoso + HIV-1 RNA/NAT según disponibilidad y riesgo.",
+          "Repetir prueba al cierre de ventana diagnóstica y reforzar prevención."
+        ];
+      } else {
+        cls = "result green";
+        title = "VIH no reactivo en escenario de bajo riesgo reciente";
+        bullets = [
+          "Interpretar como no reactivo si no hay exposición reciente ni síntomas.",
+          "Ofrecer prevención, PrEP si riesgo continuo y retesteo periódico según riesgo.",
+          "Documentar tipo de prueba y fecha."
+        ];
+      }
+    } else if(a1 === "reactive" && a2 === "notdone"){
+      cls = "result orange";
+      title = "A1 reactiva: requiere confirmación";
+      bullets = [
+        "No reportar diagnóstico definitivo con una sola prueba.",
+        context === "hospital" ? "Realizar diferenciación VIH-1/VIH-2; si negativa/indeterminada, HIV-1 RNA/NAT." : "Realizar A2 diferente; si A2 reactiva, continuar a A3 según estrategia OMS.",
+        "Brindar consejería y asegurar que el paciente no se pierda del seguimiento."
+      ];
+    } else if(a1 === "reactive" && (a2 === "negative" || a2 === "indeterminate")){
+      cls = "result orange";
+      title = "Resultado discordante o indeterminado";
+      bullets = [
+        "Clasificar como VIH inconcluso hasta resolver.",
+        "Tomar nueva muestra y considerar HIV-1 RNA/NAT, especialmente si hay exposición reciente.",
+        "No etiquetar como VIH positivo ni negativo definitivo sin resolución."
+      ];
+    } else if(a1 === "reactive" && a2 === "reactive" && a3 === "notdone"){
+      cls = "result orange";
+      title = "Dos pruebas reactivas: falta cierre del algoritmo OMS o clasificación";
+      bullets = [
+        "Si se sigue ruta OMS, aplicar A3 diferente para diagnóstico positivo.",
+        "Si se sigue ruta hospitalaria, asegurar diferenciación VIH-1/VIH-2 o NAT según discordancia.",
+        "Preparar vinculación a atención y consejería."
+      ];
+    } else if(a1 === "reactive" && a2 === "reactive" && a3 === "reactive"){
+      cls = "result red";
+      title = "Diagnóstico VIH positivo por tres pruebas reactivas";
+      bullets = [
+        "Vincular inmediatamente a atención VIH.",
+        "Realizar estudios basales: CD4, carga viral, genotipo si disponible, HBV/HCV/ITS/TB/embarazo según contexto.",
+        "Iniciar ART inmediatamente o lo antes posible conforme guía local.",
+        "Realizar retest previo a ART si el programa local lo exige."
+      ];
+    } else if(a1 === "reactive" && a2 === "reactive" && a3 === "negative"){
+      cls = "result orange";
+      title = "Discordancia en A3";
+      bullets = [
+        "Resultado inconcluso: revisar calidad, lotes, identificación y tipo de muestra.",
+        "Repetir con muestra nueva y considerar laboratorio de referencia/NAT.",
+        "Mantener consejería y seguimiento activo."
+      ];
+    } else {
+      cls = "result blue";
+      title = "Revisar caso";
+      bullets = [
+        "La combinación ingresada requiere revisión por laboratorio o infectología.",
+        "Documentar ventana, tipo de prueba y trazabilidad.",
+        "Considerar repetir con muestra nueva."
+      ];
+    }
+
+    out.className = cls;
+    out.innerHTML = resultHTML(cls, title, bullets);
+  }
+
+  function resetSimulator(){
+    document.getElementById('ageGroup').value='adult';
+    document.getElementById('days').value=21;
+    document.getElementById('acuteSymptoms').value='no';
+    document.getElementById('prep').value='none';
+    document.getElementById('a1').value='notdone';
+    document.getElementById('a2').value='notdone';
+    document.getElementById('a3').value='notdone';
+    document.getElementById('nat').value='notdone';
+    document.getElementById('context').value='hospital';
+    document.getElementById('decisionResult').className='result blue';
+    document.getElementById('decisionResult').innerHTML='<h3>Resultado</h3>Completa el caso y presiona “Analizar caso”.';
+  }
+
+  function copyNote(){
+    const text = document.getElementById('decisionResult').innerText;
+    navigator.clipboard.writeText(text).then(()=>alert('Nota copiada al portapapeles.'));
+  }
+
+  function renderCases(){
+    const root = document.getElementById('caseContainer');
+    root.innerHTML = cases.map((c,i)=>`
+      <div class="case">
+        <h3>${c.title}</h3>
+        <div>${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <p>${c.stem}</p>
+        <p><strong>Pregunta:</strong> ${c.q}</p>
+        <button class="secondary" onclick="toggleAnswer(${i})">Mostrar/ocultar respuesta</button>
+        <div class="answer" id="ans${i}"><strong>Respuesta sugerida:</strong><br>${c.answer}</div>
+      </div>
+    `).join('');
+  }
+  function toggleAnswer(i){document.getElementById('ans'+i).classList.toggle('show')}
+  function expandAllCases(){document.querySelectorAll('.answer').forEach(a=>a.classList.add('show'))}
+  function collapseAllCases(){document.querySelectorAll('.answer').forEach(a=>a.classList.remove('show'))}
+
+  function renderTests(){
+    const cat = document.getElementById('testFilter').value;
+    const q = (document.getElementById('testSearch').value || '').toLowerCase();
+    const rows = tests.filter(t => (cat === 'all' || t.cat === cat) && JSON.stringify(t).toLowerCase().includes(q));
+    document.getElementById('testRows').innerHTML = rows.map(t=>`
+      <tr>
+        <td><span class="pill blue">${t.catLabel}</span></td>
+        <td>${t.examples}</td>
+        <td>${t.sample}</td>
+        <td>${t.use}</td>
+        <td>${t.limitation}</td>
+      </tr>
+    `).join('');
+  }
+
+  renderCases();
+  renderTests();
+</script>
+</body>
+</html>
